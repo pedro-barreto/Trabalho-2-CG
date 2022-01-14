@@ -1,20 +1,39 @@
 #include <GL/glut.h>
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include "ObjLoader.h"
 
-glm::vec3 cam_pos(0,15,30);
-glm::vec3 vis_pos(0,1,0);
+glm::vec3 cam_pos(0,2,3);
+glm::vec3 vis_pos(0,0,0);
 GLfloat angle_center = 0;
 
-static unsigned blenderModelId;
+static unsigned estatua;
 
 void inicio(){
 
-    glClearColor(1,1,1,1);
-    glLineWidth(3);
+    glClearColor(0,0,0,1);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_COLOR_MATERIAL);
 
-    ObjLoader::loadOBJ(blenderModelId, "Blender/monkey.obj");
+    float globalAmb[] = { 0.1f , 0.1f , 0.1f , 1.0f};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmb);
+
+    glm::mat4x4 luz = {
+        {0.1f, 0.1f, 0.1f, 1.0f},//ambiente
+        {0.8f, 0.8f, 0.8f, 1.0f},//difusa
+        {1.0f, 1.0f, 1.0f, 1.0f},//especular
+        {0.0f, 0.0f, 1.0f, 1.0f} //posição
+    };
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT , &luz[0][0]);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE , &luz[1][0]);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, &luz[2][0]);
+    glLightfv(GL_LIGHT0, GL_POSITION, &luz[3][0]);
+
+    ObjLoader::loadOBJ(estatua, "modelos/fertility.obj");
  
     angle_center = 0.0;
 
@@ -71,12 +90,17 @@ void desenha(){
     glm::mat4 cameraMatrix = glm::lookAt(cam_pos, vis_pos, glm::vec3(0,1,0));
     glLoadMatrixf(glm::value_ptr(cameraMatrix));
 
+    float matSpecular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpecular);
+    glMaterialf(GL_FRONT,GL_SHININESS , 128);
+
     glRotatef(angle_center, 0, cam_pos[1], 0);
 
     glPushMatrix();
-        glScalef(5,5,5);
-        glColor3f(1,0,0);
-        glCallList(blenderModelId);
+
+        glColor3f(0,1,0);
+        glCallList(estatua);
+
     glPopMatrix();
 
     glutSwapBuffers();
@@ -89,7 +113,7 @@ int main(int argc, char** argv){
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowPosition(50,200);
     glutInitWindowSize(700,700);
-    glutCreateWindow("Jogo de Damas");
+    glutCreateWindow("Teste");
 
     inicio();
     glutKeyboardFunc(teclado);
@@ -98,6 +122,6 @@ int main(int argc, char** argv){
 
 }
 
-//cd Trabalho-Final-CG
-//g++ main.cpp ObjLoader.cpp Vetor.cpp Material.cpp -o main.exe -lopengl32 -lfreeglut
+//cd Trabalho-2-CG
+//g++ main.cpp ObjLoader.cpp Vetor.cpp -o main.exe -lopengl32 -lfreeglut
 //start main.exe

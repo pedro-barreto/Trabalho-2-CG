@@ -2,21 +2,18 @@
 #include<iostream>
 #include<fstream>
 #include<sstream>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
 #include "Vetor.h"
 #include "Material.h"
 
 struct face{
 
 	unsigned index;
-	int vertice[4];
+	int vertice[3];
 
-	face(int a, int b, int c, int d, int e){
+	face(int a, int b, int c, int e){
 
 		vertice[0] = a; vertice[1] = b; 
-		vertice[2] = c; vertice[3] = d;
-		index = e;
+		vertice[2] = c; index = e;
 
 	}
 
