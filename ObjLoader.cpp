@@ -67,9 +67,9 @@ void ObjLoader::loadOBJ(unsigned & id, const char * filePath){
 
 	}
 
-	std::cout << "Total Vertices: " << vertices.size() << "\n";
+	/*std::cout << "Total Vertices: " << vertices.size() << "\n";
 	std::cout << "Total Normals: " << normals.size() << "\n";
-	std::cout << "Total Faces: " << faces.size() << "\n";
+	std::cout << "Total Faces: " << faces.size() << "\n";*/
 
 	id = glGenLists(1);
 
@@ -89,6 +89,7 @@ void ObjLoader::loadOBJ(unsigned & id, const char * filePath){
 		glVertex3fv(&vertices[v2].x);
 		glVertex3fv(&vertices[v3].x);
 		glEnd();
+		
 	}
 
 	glEndList();
