@@ -1,7 +1,4 @@
-#include <GL/glut.h>
-#include <iostream>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
+#include "teclado.h"
 #include "ObjLoader.h"
 
 static unsigned cenario;
@@ -10,36 +7,25 @@ static unsigned decoracao;
 static unsigned cadeira;
 static unsigned talher;
 
-float rotacaoX = 0, rotacaoY = 0 , rotacaoZ = 0;
-
-glm::vec3 P_cam , V_cam , X_cam, Y_cam, Z_cam;
-glm::vec3 Pos_cam(0,2,4);
-glm::mat4 M_cam;
-
-float velocidade = 0.1;
-
 void inicio(){
 
-    glClearColor(0.3,0.3,0.3,1);
-    glPointSize(20.0);
-    glLineWidth(3.0);
+    glClearColor(0.8,0.8,0.8,1);
+    glPointSize(30.0);
+    glLineWidth(5);
 
     glEnable(GL_DEPTH_TEST);
-
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
-
     glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-    glm::mat4x4 luz = {
+        glm::mat4x4 luz = {
 
-        {0.1f, 0.1f, 0.1f, 1.0f},//ambient
-        {0.6f, 0.6f, 0.6f, 1.0f},//difuse
-        {1.0f, 1.0f, 1.0f, 1.0f},//specular
-        {0.0f, 0.0f, 1.0f, 0.0f} //position
-        
-    };
+            {0.1f, 0.1f, 0.1f, 1.0f},//ambient
+            {0.8f, 0.8f, 0.8f, 1.0f},//difuse
+            {1.0f, 1.0f, 1.0f, 1.0f},//specular
+            {10.0f, 10.0f, 10.0f, 1.0f} //position
+            
+        };
 
         glLightfv(GL_LIGHT0, GL_AMBIENT , &luz[0][0]);
         glLightfv(GL_LIGHT0, GL_DIFFUSE , &luz[1][0]);
@@ -52,217 +38,244 @@ void inicio(){
     ObjLoader::loadOBJ(cadeira, "objetos/cadeira.obj");
     ObjLoader::loadOBJ(talher, "objetos/talher.obj");
 
-        P_cam = glm::vec3(0,0,0);
-        V_cam = glm::vec3(0,1,0);
+        P_cam = glm::vec3(0,2,8);
+        V_cam = glm::vec3(P_cam.x + Z_cam.x, P_cam.y + Y_cam.y , P_cam.z + Z_cam.z);
         X_cam = glm::vec3(-1,0,0);
         Y_cam = glm::vec3(0,1,0);
         Z_cam = glm::vec3(0,0,-1);
 
-            M_cam = glm::mat4(1);
+        M_cam = glm::mat4(1);
 
-                M_cam[0] = glm::vec4(X_cam,0) ; M_cam[1] = glm::vec4(Y_cam,0);
-                M_cam[2] = glm::vec4(Z_cam,0) ; M_cam[3] = glm::vec4(P_cam,1);
+        M_cam[0] = glm::vec4(X_cam,0) ; M_cam[1] = glm::vec4(Y_cam,0);
+        M_cam[2] = glm::vec4(Z_cam,0) ; M_cam[3] = glm::vec4(P_cam,1);
 
-            M_cam = glm::transpose(M_cam);
+        M_cam = glm::transpose(M_cam);
 
 }
 
-glm::mat4 rotacao;
+void quadrado(){
 
-void teclado(unsigned char tecla, int x, int y){
+    glPushMatrix();
 
-    switch(tecla){
+        glBegin(GL_TRIANGLE_STRIP);
 
-        case 'w':case 'W':
-            
-            P_cam += velocidade * Z_cam;
-            
-        break;
+            glColor3f(1,1,1);
+            glVertex3f(0,0,0);
+            glVertex3f(1,0,0);
+            glVertex3f(0,0,1);
+            glVertex3f(1,0,1);
 
-        case 's':case 'S':
+        glEnd();
 
-            P_cam -= velocidade * Z_cam;
+        glBegin(GL_LINE_LOOP);
 
-        break;
+            glColor3f(0,0,0);
+            glVertex3f(0,0,0);
+            glVertex3f(0,0,1);
+            glVertex3f(1,0,1);
+            glVertex3f(1,0,0);
 
-        case 'a':case 'A':
+        glEnd();
 
-            P_cam += velocidade * X_cam;
+    glPopMatrix();
 
-        break;
+}
 
-        case 'd':case 'D':
+void chao(){
 
-            P_cam -= velocidade * X_cam;
+    for (int i = -30; i < 30; i++){
 
-        break;
+        for (int j = -30; j < 30; j++){
+        
+            glPushMatrix();
 
-        case 'j':case 'J':
+                glm::mat4 quad_T  = glm::translate(glm::mat4(1.0),glm::vec3(i,-0.4,j));
+    
+                glm::mat4 quad_M = quad_T;
 
-            rotacaoY += 1;
+                glMultMatrixf(glm::value_ptr(quad_M));
 
-            rotacao = glm::rotate(glm::mat4(1.0), glm::radians(rotacaoY),glm::vec3(0,Y_cam.y,0));
+                quadrado();
 
-            X_cam = glm::vec3( rotacao * glm::vec4(X_cam,0));
-            Y_cam = glm::vec3( rotacao * glm::vec4(Y_cam,0));
-            Z_cam = glm::vec3( rotacao * glm::vec4(Z_cam,0));
+            glPopMatrix();
 
-            if (rotacaoY >= 360){
-                
-                rotacaoY = 0;
-
-            }
-            
-
-        break;
-
-        case 'l':case 'L':
-
-            rotacaoY += 1;
-
-        break;
-
-        case 'i':case 'I':
-
-            rotacaoX -= 1;
-
-        break;
-
-        case 'k':case 'K':
-
-            rotacaoX += 1;
-
-        break;
-           
+        }
+        
     }
-
-    M_cam[0] = glm::vec4(X_cam,0) ; M_cam[1] = glm::vec4(Y_cam,0);
-    M_cam[2] = glm::vec4(Z_cam,0) ; M_cam[3] = glm::vec4(P_cam,1);
-
-    M_cam = glm::transpose(M_cam);
-
-    glutPostRedisplay();
 
 }
 
 void desenha(){
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glMatrixMode(GL_PROJECTION);
-    glm::mat4 projecaoMatrix = glm::frustum(-1,1,-1,1,2,100);
-    glLoadMatrixf(glm::value_ptr(projecaoMatrix));
 
-    glMatrixMode(GL_MODELVIEW);
-    glm::mat4 cameraMatrix = glm::lookAt( Pos_cam , {0,0,0}, glm::vec3(0,1,0));
-    glLoadMatrixf(glm::value_ptr(cameraMatrix));
+        glMatrixMode(GL_PROJECTION);
+        glm::mat4 projecaoMatrix = glm::frustum(-1,1,-1,1,2,50);
+        glLoadMatrixf(glm::value_ptr(projecaoMatrix));
 
+        glMatrixMode(GL_MODELVIEW);
+        glm::mat4 cameraMatrix = glm::lookAt( P_cam, {0,0,0} , glm::vec3(0,1,0));
+        glLoadMatrixf(glm::value_ptr(cameraMatrix));
 
-    float matSpecular[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpecular);
-    glMaterialf(GL_FRONT,GL_SHININESS , 128);
+        float matSpecular[] = {1.0f , 1.0f , 1.0f, 1.0f};
+        glMaterialfv(GL_FRONT, GL_SPECULAR, matSpecular);
+        glMaterialf(GL_FRONT,GL_SHININESS , 80);
 
-    glPushMatrix();
+        chao();
 
-        glMultMatrixf(glm::value_ptr(M_cam));
+        /*glPushMatrix();
 
-    glPopMatrix();
+            glBegin(GL_LINES);
+                glColor3f(1, 0, 0);
+                glVertex3f(-1000, 0, 0);
+                glVertex3f(1000, 0, 0);
+                glColor3f(0, 1, 0);
+                glVertex3f(0, -1000, 0);
+                glVertex3f(0, 1000, 0);
+                glColor3f(0, 0, 1);
+                glVertex3f(0, 0, -1000);
+                glVertex3f(0, 0, 1000);
+            glEnd();
 
-    glPushMatrix();
+        glPopMatrix();
 
-        glBegin(GL_LINES);
-            glColor3f(1, 0, 0);
-            glVertex3f(-50, 0, 0);
-            glVertex3f(50, 0, 0);
-            glColor3f(0, 1, 0);
-            glVertex3f(0, -50, 0);
-            glVertex3f(0, 50, 0);
-            glColor3f(0, 0, 1);
-            glVertex3f(0, 0, -50);
-            glVertex3f(0, 0, 50);
-        glEnd();
+        glPushMatrix();
 
-    glPopMatrix();
+            glBegin(GL_LINES);
 
-    glPushMatrix();
+                glColor3f(1, 0, 0);
+                glVertex3f(P_cam.x, P_cam.y, P_cam.z);
+                glVertex3f(P_cam.x + X_cam.x, P_cam.y + X_cam.y, P_cam.z + X_cam.z);
+                glColor3f(0, 1, 0);
+                glVertex3f(P_cam.x, P_cam.y, P_cam.z);
+                glVertex3f(P_cam.x + Y_cam.x, P_cam.y + Y_cam.y, P_cam.z + Y_cam.z);
+                glColor3f(0, 0, 1);
+                glVertex3f(P_cam.x, P_cam.y, P_cam.z);
+                glVertex3f(P_cam.x + Z_cam.x, P_cam.y + Z_cam.y , P_cam.z + Z_cam.z);
+        
+            glEnd();
 
-        //glRotatef(rotacaoX,X_cam);
+            glBegin(GL_POINTS);
 
-        glBegin(GL_LINES);
+                glColor3f(0,1,1);
+                glVertex3f(P_cam.x + Z_cam.x, P_cam.y + Y_cam.y , P_cam.z + Z_cam.z);
 
-            glColor3f(1, 0, 0);
-            glVertex3f(P_cam.x, P_cam.y, P_cam.z);
-            glVertex3f(P_cam.x + X_cam.x, P_cam.y + X_cam.y, P_cam.z + X_cam.z);
-            glColor3f(0, 1, 0);
-            glVertex3f(P_cam.x, P_cam.y, P_cam.z);
-            glVertex3f(P_cam.x + Y_cam.x, P_cam.y + Y_cam.y, P_cam.z + Y_cam.z);
-            glColor3f(0, 0, 1);
-            glVertex3f(P_cam.x, P_cam.y, P_cam.z);
-            glVertex3f(P_cam.x + Z_cam.x, P_cam.y + Z_cam.y , P_cam.z + Z_cam.z);
-    
-        glEnd();
+            glEnd();
 
-        glBegin(GL_POINTS);
+        glPopMatrix();*/
 
-            glColor3f(0,1,1);
-            glVertex3f(P_cam.x,P_cam.y + (Y_cam.y / 2), P_cam.z + Z_cam.z);
+        glPushMatrix();
 
-        glEnd();
+            glColor3f(0, 0.7, 0.7);
 
-    glPopMatrix();
+            glm::mat4 cen_T  = glm::translate(glm::mat4(1.0),glm::vec3(0,0,0));
+            glm::mat4 cen_R  = glm::rotate(glm::mat4(1.0),glm::radians(-90.f),glm::vec3(0,1,0));
+            glm::mat4 cen_S  = glm::scale(glm::mat4(1.0),glm::vec3(4,4,4));
 
-    /*glPushMatrix();
+            glm::mat4 cen_M = cen_T * cen_R * cen_S;
 
-        glRotatef(-90,0,1,0);
-        glScalef(3,3,3);
-        glColor3f(0.1, 0.2, 0.3);
-        glCallList(cenario);
+            glMultMatrixf(glm::value_ptr(cen_M));
 
-    glPopMatrix();
+            glCallList(cenario);
 
-    glPushMatrix();
+        glPopMatrix();
 
-        glColor3f(0.81, 0.57, 0.38);
-        glCallList(mesa);
+        glPushMatrix();
 
-    glPopMatrix();
+            glColor3f(0.81, 0.57, 0.38);
 
-    glPushMatrix();
+            glm::mat4 mesa_T  = glm::translate(glm::mat4(1.0),glm::vec3(0,0,0));
+            glm::mat4 mesa_R  = glm::rotate(glm::mat4(1.0),glm::radians(0.f),glm::vec3(0,1,0));
+            glm::mat4 mesa_S  = glm::scale(glm::mat4(1.0),glm::vec3(1,1,1));
 
-        glRotatef(90,0,1,0);
-        glRotatef(-20,0,0,1);
-        glTranslatef(0,0.75,0);
-        glScalef(0.2,0.2,0.2);
-        glColor3f(1,0,0);
-        glCallList(decoracao);
+            glm::mat4 mesa_M = mesa_T *  mesa_R * mesa_S;
 
-    glPopMatrix();
+            glMultMatrixf(glm::value_ptr(mesa_M));
 
-    glPushMatrix();
+            glCallList(mesa);
 
-        glTranslatef(-0.6,-0.2,0.4);
-        glColor3f(0.6,0.6,0.6);
-        glCallList(cadeira);
+        glPopMatrix();
 
-    glPopMatrix();
+        glPushMatrix();
 
-    glPushMatrix();
+            glColor3f(0.59, 0, 0.11);
 
-        glTranslatef(-0.6,-0.2,-0.4);
-        glColor3f(0.6,0.6,0.6);
-        glCallList(cadeira);
+            glm::mat4 dec_T  = glm::translate(glm::mat4(1.0),glm::vec3(1.5,0.3,0.5));
+            glm::mat4 dec_R  = glm::rotate(glm::mat4(1.0),glm::radians(-90.f),glm::vec3(0,1,0));
+            glm::mat4 dec_R2 = glm::rotate(glm::mat4(1.0),glm::radians(-20.f),glm::vec3(0,0,1)); 
+            glm::mat4 dec_S  = glm::scale(glm::mat4(1.0),glm::vec3(1,1,1));  
 
-    glPopMatrix();
+            glm::mat4 dec_M = dec_T *  dec_R * dec_R2 * dec_S;
 
-    glPushMatrix();
+            glMultMatrixf(glm::value_ptr(dec_M));
 
-        glRotatef(180,0,1,0);
-        glTranslatef(0,0.6,-0.5);
-        glScalef(0.7,0.7,0.7);
-        glColor3f(0.9,0.9,0.9);
-        glCallList(talher);
+            glCallList(decoracao);
 
-    glPopMatrix();*/
+        glPopMatrix();
+
+        glPushMatrix();
+
+            glColor3f(0.6,0.6,0.6);
+
+            glm::mat4 cad_T  = glm::translate(glm::mat4(1.0),glm::vec3(-0.6,-0.3,0.4));
+            glm::mat4 cad_R  = glm::rotate(glm::mat4(1.0),glm::radians(0.f),glm::vec3(0,1,0));
+            glm::mat4 cad_S  = glm::scale(glm::mat4(1.0),glm::vec3(1,1,1));
+
+            glm::mat4 cad_M = cad_T * cad_R * cad_S;
+
+            glMultMatrixf(glm::value_ptr(cad_M));
+
+            glCallList(cadeira);
+
+        glPopMatrix();
+
+        glPushMatrix();
+
+            glColor3f(0.6,0.6,0.6);
+
+            glm::mat4 cad2_T  = glm::translate(glm::mat4(1.0),glm::vec3(-0.6,-0.3,-0.6));
+            glm::mat4 cad2_R  = glm::rotate(glm::mat4(1.0),glm::radians(0.f),glm::vec3(0,1,0));
+            glm::mat4 cad2_S  = glm::scale(glm::mat4(1.0),glm::vec3(1,1,1));
+
+            glm::mat4 cad2_M = cad2_T * cad2_R * cad2_S;
+
+            glMultMatrixf(glm::value_ptr(cad2_M));
+
+            glCallList(cadeira);
+
+        glPopMatrix();
+
+        glPushMatrix();
+
+            glColor3f(0.9,0.9,0.9);
+
+                glm::mat4 tal_T  = glm::translate(glm::mat4(1.0),glm::vec3(0,0.6,-0.5));
+                glm::mat4 tal_R  = glm::rotate(glm::mat4(1.0),glm::radians(180.f),glm::vec3(0,1,0));
+                glm::mat4 tal_S  = glm::scale(glm::mat4(1.0),glm::vec3(0.7,0.7,0.7));
+
+            glm::mat4 tal_M = tal_T *  tal_R * tal_S;
+
+            glMultMatrixf(glm::value_ptr(tal_M));
+
+            glCallList(talher);
+
+        glPopMatrix();
+
+        glPushMatrix();
+
+            glColor3f(0.9,0.9,0.9);
+
+                glm::mat4 tal2_T  = glm::translate(glm::mat4(1.0),glm::vec3(0,0.6,0.5));
+                glm::mat4 tal2_R  = glm::rotate(glm::mat4(1.0),glm::radians(180.f),glm::vec3(0,1,0));
+                glm::mat4 tal2_S  = glm::scale(glm::mat4(1.0),glm::vec3(0.7,0.7,0.7));
+
+                glm::mat4 tal2_M = tal2_T *  tal2_R * tal2_S;
+
+            glMultMatrixf(glm::value_ptr(tal2_M));
+
+            glCallList(talher);
+
+        glPopMatrix();
 
     glutSwapBuffers();
 
@@ -274,7 +287,7 @@ int main(int argc, char** argv){
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowPosition(300,50);
     glutInitWindowSize(700,700);
-    glutCreateWindow("Teste");
+    glutCreateWindow("Cenario - CG T2");
 
     inicio();
     glutKeyboardFunc(teclado);

@@ -67,10 +67,6 @@ void ObjLoader::loadOBJ(unsigned & id, const char * filePath){
 
 	}
 
-	/*std::cout << "Total Vertices: " << vertices.size() << "\n";
-	std::cout << "Total Normals: " << normals.size() << "\n";
-	std::cout << "Total Faces: " << faces.size() << "\n";*/
-
 	id = glGenLists(1);
 
 	glNewList(id, GL_COMPILE);
