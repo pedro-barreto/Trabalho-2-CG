@@ -1,8 +1,8 @@
 //PEDRO HENRIQUE BARRETO DOS SANTOS - 475626
-#include "teclado.h"
-#include "ObjLoader.h"
-#include "desenhosExtras.h"
-#include "objetos.h"
+#include "funcoes/teclado.h"
+#include "funcoes/objetos.h"
+#include "funcoes/ObjLoader.h"
+#include "funcoes/desenhosExtras.h"
 
 void inicio(){
 
@@ -69,7 +69,6 @@ int main(int argc, char** argv){
 
 }
 
-//cd ../copia
 //cd Trabalho-2-CG
-//g++ main.cpp ObjLoader.cpp -o main.exe -lopengl32 -lfreeglut
+//g++ main.cpp funcoes/ObjLoader.cpp -o main.exe -lopengl32 -lfreeglut
 //start main.exe
